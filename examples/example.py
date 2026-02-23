@@ -4,13 +4,13 @@ import time
 import ctypes
 import math
 
-import comfy_aimdo.torch
-import comfy_aimdo.control
-from comfy_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin, vbar_signature_compare, vbars_analyze
+import hanzo_aimdo.torch
+import hanzo_aimdo.control
+from hanzo_aimdo.model_vbar import ModelVBAR, vbar_fault, vbar_unpin, vbar_signature_compare, vbars_analyze
 
-comfy_aimdo.control.set_log_debug()
+hanzo_aimdo.control.set_log_debug()
 
-allocator = comfy_aimdo.torch.CUDAPluggableAllocator()
+allocator = hanzo_aimdo.torch.CUDAPluggableAllocator()
 
 signatures = {}
 
@@ -20,7 +20,7 @@ def run_layer(input_tensor, weight, cpu_source, weight_offset): #NOTE: offset ju
     vbar, ptr, size = weight
     signature = vbar_fault(weight)
     if signature is not None:
-        weight_tensor = comfy_aimdo.torch.aimdo_to_tensor(weight, torch.device("cuda:0")).view(dtype=input_tensor.dtype).view(input_tensor.shape)
+        weight_tensor = hanzo_aimdo.torch.aimdo_to_tensor(weight, torch.device("cuda:0")).view(dtype=input_tensor.dtype).view(input_tensor.shape)
         if not vbar_signature_compare(signature, signatures.get(weight, None)):
             weight_tensor.copy_(cpu_source)
             if weight_offset is not None:
